@@ -9,25 +9,16 @@ package main
 import (
 	"fmt"
 	"log"
-
 	"os"
 	"strings"
 
-	flag "github.com/ogier/pflag"
+	flag "github.com/jiapeish/pgdiff/pflag"
 
-	"github.com/joncrlsn/pgutil"
 	_ "github.com/lib/pq"
-)
 
-// Schema is a database definition (table, column, constraint, indes, role, etc) that can be
-// added, dropped, or changed to match another database.
-type Schema interface {
-	Compare(schema interface{}) int
-	Add()
-	Drop()
-	Change(schema interface{})
-	NextRow() bool
-}
+	"github.com/jiapeish/pgdiff/grant"
+	"github.com/jiapeish/pgdiff/pkg"
+)
 
 const (
 	version = "0.9.3"
@@ -35,8 +26,6 @@ const (
 
 var (
 	args       []string
-	dbInfo1    pgutil.DbInfo
-	dbInfo2    pgutil.DbInfo
 	schemaType string
 )
 
@@ -54,7 +43,7 @@ func main() {
 	var helpPtr = flag.BoolP("help", "?", false, "print help information")
 	var versionPtr = flag.BoolP("version", "V", false, "print version information")
 
-	dbInfo1, dbInfo2 = parseFlags()
+	pkg.DbInfo1, pkg.DbInfo2 = pkg.ParseFlags()
 
 	// Remaining args:
 	args = flag.Args()
@@ -77,7 +66,7 @@ func main() {
 	}
 
 	// Verify schemas
-	schemas := dbInfo1.DbSchema + dbInfo2.DbSchema
+	schemas := pkg.DbInfo1.DbSchema + pkg.DbInfo2.DbSchema
 	if schemas != "**" && strings.Contains(schemas, "*") {
 		fmt.Println("If one schema is an asterisk, both must be.")
 		os.Exit(1)
@@ -86,108 +75,69 @@ func main() {
 	schemaType = strings.ToUpper(args[0])
 	fmt.Println("-- schemaType:", schemaType)
 
-	fmt.Println("-- db1:", dbInfo1)
-	fmt.Println("-- db2:", dbInfo2)
+	fmt.Println("-- db1:", pkg.DbInfo1)
+	fmt.Println("-- db2:", pkg.DbInfo2)
 	fmt.Println("-- Run the following SQL against db2:")
 
-	conn1, err := dbInfo1.Open()
+	conn1, err := pkg.DbInfo1.Open()
 	check("opening database 1", err)
 
-	conn2, err := dbInfo2.Open()
+	conn2, err := pkg.DbInfo2.Open()
 	check("opening database 2", err)
 
 	// This section needs to be improved so that you do not need to choose the type
 	// of alter statements to generate.  Rather, all should be generated in the
 	// proper order.
 	if schemaType == "ALL" {
-		if dbInfo1.DbSchema == "*" {
-			compareSchematas(conn1, conn2)
+		if pkg.DbInfo1.DbSchema == "*" {
+			pkg.compareSchematas(conn1, conn2)
 		}
-		compareSchematas(conn1, conn2)
-		compareRoles(conn1, conn2)
-		compareSequences(conn1, conn2)
-		compareTables(conn1, conn2)
-		compareColumns(conn1, conn2)
-		compareIndexes(conn1, conn2) // includes PK and Unique constraints
-		compareViews(conn1, conn2)
-		compareMatViews(conn1, conn2)
-		compareForeignKeys(conn1, conn2)
-		compareFunctions(conn1, conn2)
-		compareTriggers(conn1, conn2)
-		compareOwners(conn1, conn2)
-		compareGrantRelationships(conn1, conn2)
-		compareGrantAttributes(conn1, conn2)
+		pkg.compareSchematas(conn1, conn2)
+		pkg.compareRoles(conn1, conn2)
+		pkg.compareSequences(conn1, conn2)
+		pkg.compareTables(conn1, conn2)
+		pkg.compareColumns(conn1, conn2)
+		pkg.compareIndexes(conn1, conn2) // includes PK and Unique constraints
+		pkg.compareViews(conn1, conn2)
+		pkg.compareMatViews(conn1, conn2)
+		pkg.compareForeignKeys(conn1, conn2)
+		pkg.compareFunctions(conn1, conn2)
+		pkg.compareTriggers(conn1, conn2)
+		pkg.compareOwners(conn1, conn2)
+		grant.compareGrantRelationships(conn1, conn2)
+		grant.compareGrantAttributes(conn1, conn2)
 	} else if schemaType == "SCHEMA" {
-		compareSchematas(conn1, conn2)
+		pkg.compareSchematas(conn1, conn2)
 	} else if schemaType == "ROLE" {
-		compareRoles(conn1, conn2)
+		pkg.compareRoles(conn1, conn2)
 	} else if schemaType == "SEQUENCE" {
-		compareSequences(conn1, conn2)
+		pkg.compareSequences(conn1, conn2)
 	} else if schemaType == "TABLE" {
-		compareTables(conn1, conn2)
+		pkg.compareTables(conn1, conn2)
 	} else if schemaType == "COLUMN" {
-		compareColumns(conn1, conn2)
+		pkg.compareColumns(conn1, conn2)
 	} else if schemaType == "TABLE_COLUMN" {
-		compareTableColumns(conn1, conn2)
+		pkg.compareTableColumns(conn1, conn2)
 	} else if schemaType == "INDEX" {
-		compareIndexes(conn1, conn2)
+		pkg.compareIndexes(conn1, conn2)
 	} else if schemaType == "VIEW" {
-		compareViews(conn1, conn2)
+		pkg.compareViews(conn1, conn2)
 	} else if schemaType == "MATVIEW" {
-		compareMatViews(conn1, conn2)
+		pkg.compareMatViews(conn1, conn2)
 	} else if schemaType == "FOREIGN_KEY" {
-		compareForeignKeys(conn1, conn2)
+		pkg.compareForeignKeys(conn1, conn2)
 	} else if schemaType == "FUNCTION" {
-		compareFunctions(conn1, conn2)
+		pkg.compareFunctions(conn1, conn2)
 	} else if schemaType == "TRIGGER" {
-		compareTriggers(conn1, conn2)
+		pkg.compareTriggers(conn1, conn2)
 	} else if schemaType == "OWNER" {
-		compareOwners(conn1, conn2)
+		pkg.compareOwners(conn1, conn2)
 	} else if schemaType == "GRANT_RELATIONSHIP" {
-		compareGrantRelationships(conn1, conn2)
+		grant.compareGrantRelationships(conn1, conn2)
 	} else if schemaType == "GRANT_ATTRIBUTE" {
-		compareGrantAttributes(conn1, conn2)
+		grant.compareGrantAttributes(conn1, conn2)
 	} else {
 		fmt.Println("Not yet handled:", schemaType)
-	}
-}
-
-/*
- * This is a generic diff function that compares tables, columns, indexes, roles, grants, etc.
- * Different behaviors are specified the Schema implementations
- */
-func doDiff(db1 Schema, db2 Schema) {
-
-	more1 := db1.NextRow()
-	more2 := db2.NextRow()
-	for more1 || more2 {
-		compareVal := db1.Compare(db2)
-		if compareVal == 0 {
-			// table and column match, look for non-identifying changes
-			db1.Change(db2)
-			more1 = db1.NextRow()
-			more2 = db2.NextRow()
-		} else if compareVal < 0 {
-			// db2 is missing a value that db1 has
-			if more1 {
-				db1.Add()
-				more1 = db1.NextRow()
-			} else {
-				// db1 is at the end
-				db2.Drop()
-				more2 = db2.NextRow()
-			}
-		} else if compareVal > 0 {
-			// db2 has an extra column that we don't want
-			if more2 {
-				db2.Drop()
-				more2 = db2.NextRow()
-			} else {
-				// db2 is at the end
-				db1.Add()
-				more1 = db1.NextRow()
-			}
-		}
 	}
 }
 

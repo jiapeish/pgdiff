@@ -1,14 +1,15 @@
-module pgdiff
+module github.com/jiapeish/pgdiff
 
-go 1.13
+go 1.18
 
 require (
-	github.com/joncrlsn/fileutil v0.0.0-20150212043926-71757336e569 // indirect
-	github.com/joncrlsn/misc v0.0.0-20160408024000-193a3fcec166
-	github.com/joncrlsn/pgutil v0.0.0-20171213024902-4c8aab9306b4
-	github.com/kr/pretty v0.2.1 // indirect
+	github.com/kr/pretty v0.3.1
 	github.com/lib/pq v1.10.9
-	github.com/ogier/pflag v0.0.1
-	github.com/stvp/assert v0.0.0-20170616060220-4bc16443988b // indirect
-	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad // indirect
+	golang.org/x/crypto v0.31.0
+)
+
+require (
+	github.com/kr/text v0.2.0 // indirect
+	golang.org/x/sys v0.28.0 // indirect
+	golang.org/x/term v0.27.0 // indirect
 )

@@ -8,11 +8,11 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"strings"
 
 	flag "github.com/jiapeish/pgdiff/pflag"
+	"github.com/jiapeish/pgdiff/pgutil"
 
 	_ "github.com/lib/pq"
 
@@ -80,62 +80,62 @@ func main() {
 	fmt.Println("-- Run the following SQL against db2:")
 
 	conn1, err := pkg.DbInfo1.Open()
-	check("opening database 1", err)
+	pgutil.Check("opening database 1", err)
 
 	conn2, err := pkg.DbInfo2.Open()
-	check("opening database 2", err)
+	pgutil.Check("opening database 2", err)
 
 	// This section needs to be improved so that you do not need to choose the type
 	// of alter statements to generate.  Rather, all should be generated in the
 	// proper order.
 	if schemaType == "ALL" {
 		if pkg.DbInfo1.DbSchema == "*" {
-			pkg.compareSchematas(conn1, conn2)
+			pkg.CompareSchematas(conn1, conn2)
 		}
-		pkg.compareSchematas(conn1, conn2)
-		pkg.compareRoles(conn1, conn2)
-		pkg.compareSequences(conn1, conn2)
-		pkg.compareTables(conn1, conn2)
-		pkg.compareColumns(conn1, conn2)
-		pkg.compareIndexes(conn1, conn2) // includes PK and Unique constraints
-		pkg.compareViews(conn1, conn2)
-		pkg.compareMatViews(conn1, conn2)
-		pkg.compareForeignKeys(conn1, conn2)
-		pkg.compareFunctions(conn1, conn2)
-		pkg.compareTriggers(conn1, conn2)
-		pkg.compareOwners(conn1, conn2)
-		grant.compareGrantRelationships(conn1, conn2)
-		grant.compareGrantAttributes(conn1, conn2)
+		pkg.CompareSchematas(conn1, conn2)
+		pkg.CompareRoles(conn1, conn2)
+		pkg.CompareSequences(conn1, conn2)
+		pkg.CompareTables(conn1, conn2)
+		pkg.CompareColumns(conn1, conn2)
+		pkg.CompareIndexes(conn1, conn2) // includes PK and Unique constraints
+		pkg.CompareViews(conn1, conn2)
+		pkg.CompareMatViews(conn1, conn2)
+		pkg.CompareForeignKeys(conn1, conn2)
+		pkg.CompareFunctions(conn1, conn2)
+		pkg.CompareTriggers(conn1, conn2)
+		pkg.CompareOwners(conn1, conn2)
+		grant.CompareGrantRelationships(conn1, conn2)
+		grant.CompareGrantAttributes(conn1, conn2)
 	} else if schemaType == "SCHEMA" {
-		pkg.compareSchematas(conn1, conn2)
+		pkg.CompareSchematas(conn1, conn2)
 	} else if schemaType == "ROLE" {
-		pkg.compareRoles(conn1, conn2)
+		pkg.CompareRoles(conn1, conn2)
 	} else if schemaType == "SEQUENCE" {
-		pkg.compareSequences(conn1, conn2)
+		pkg.CompareSequences(conn1, conn2)
 	} else if schemaType == "TABLE" {
-		pkg.compareTables(conn1, conn2)
+		pkg.CompareTables(conn1, conn2)
 	} else if schemaType == "COLUMN" {
-		pkg.compareColumns(conn1, conn2)
+		pkg.CompareColumns(conn1, conn2)
 	} else if schemaType == "TABLE_COLUMN" {
-		pkg.compareTableColumns(conn1, conn2)
+		pkg.CompareTableColumns(conn1, conn2)
 	} else if schemaType == "INDEX" {
-		pkg.compareIndexes(conn1, conn2)
+		pkg.CompareIndexes(conn1, conn2)
 	} else if schemaType == "VIEW" {
-		pkg.compareViews(conn1, conn2)
+		pkg.CompareViews(conn1, conn2)
 	} else if schemaType == "MATVIEW" {
-		pkg.compareMatViews(conn1, conn2)
+		pkg.CompareMatViews(conn1, conn2)
 	} else if schemaType == "FOREIGN_KEY" {
-		pkg.compareForeignKeys(conn1, conn2)
+		pkg.CompareForeignKeys(conn1, conn2)
 	} else if schemaType == "FUNCTION" {
-		pkg.compareFunctions(conn1, conn2)
+		pkg.CompareFunctions(conn1, conn2)
 	} else if schemaType == "TRIGGER" {
-		pkg.compareTriggers(conn1, conn2)
+		pkg.CompareTriggers(conn1, conn2)
 	} else if schemaType == "OWNER" {
-		pkg.compareOwners(conn1, conn2)
+		pkg.CompareOwners(conn1, conn2)
 	} else if schemaType == "GRANT_RELATIONSHIP" {
-		grant.compareGrantRelationships(conn1, conn2)
+		grant.CompareGrantRelationships(conn1, conn2)
 	} else if schemaType == "GRANT_ATTRIBUTE" {
-		grant.compareGrantAttributes(conn1, conn2)
+		grant.CompareGrantAttributes(conn1, conn2)
 	} else {
 		fmt.Println("Not yet handled:", schemaType)
 	}
@@ -166,10 +166,4 @@ Options:
 <schemaTpe> can be: ALL, SCHEMA, ROLE, SEQUENCE, TABLE, TABLE_COLUMN, VIEW, MATVIEW, COLUMN, INDEX, FOREIGN_KEY, OWNER, GRANT_RELATIONSHIP, GRANT_ATTRIBUTE, TRIGGER, FUNCTION`)
 
 	os.Exit(2)
-}
-
-func check(msg string, err error) {
-	if err != nil {
-		log.Fatal("Error "+msg, err)
-	}
 }

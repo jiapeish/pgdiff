@@ -13,7 +13,6 @@ import (
 	"sort"
 	"text/template"
 
-	"github.com/jiapeish/pgdiff/misc"
 	"github.com/jiapeish/pgdiff/pgutil"
 )
 
@@ -101,7 +100,7 @@ func (c *TableSchema) Compare(obj interface{}) int {
 		return +999
 	}
 
-	val := misc.CompareStrings(c.get("compare_name"), c2.get("compare_name"))
+	val := pgutil.CompareStrings(c.get("compare_name"), c2.get("compare_name"))
 	//fmt.Printf("-- Compared %v: %s with %s \n", val, c.get("table_name"), c2.get("table_name"))
 	return val
 }
@@ -131,7 +130,7 @@ func (c TableSchema) Change(obj interface{}) {
 }
 
 // compareTables outputs SQL to make the table names match between DBs
-func compareTables(conn1 *sql.DB, conn2 *sql.DB) {
+func CompareTables(conn1 *sql.DB, conn2 *sql.DB) {
 
 	buf1 := new(bytes.Buffer)
 	tableSqlTemplate.Execute(buf1, DbInfo1)

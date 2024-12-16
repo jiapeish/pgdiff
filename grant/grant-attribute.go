@@ -14,7 +14,6 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/jiapeish/pgdiff/misc"
 	"github.com/jiapeish/pgdiff/pgutil"
 	"github.com/jiapeish/pgdiff/pkg"
 )
@@ -138,14 +137,14 @@ func (c *GrantAttributeSchema) Compare(obj interface{}) int {
 		return +999
 	}
 
-	val := misc.CompareStrings(c.get("compare_name"), c2.get("compare_name"))
+	val := pgutil.CompareStrings(c.get("compare_name"), c2.get("compare_name"))
 	if val != 0 {
 		return val
 	}
 
 	role1, _ := parseAcl(c.get("attribute_acl"))
 	role2, _ := parseAcl(c2.get("attribute_acl"))
-	val = misc.CompareStrings(role1, role2)
+	val = pgutil.CompareStrings(role1, role2)
 	return val
 }
 
@@ -180,7 +179,7 @@ func (c *GrantAttributeSchema) Change(obj interface{}) {
 	// (for this relationship and owner)
 	var grantList []string
 	for _, g := range grants1 {
-		if !misc.ContainsString(grants2, g) {
+		if !pgutil.ContainsString(grants2, g) {
 			grantList = append(grantList, g)
 		}
 	}
@@ -193,7 +192,7 @@ func (c *GrantAttributeSchema) Change(obj interface{}) {
 	// (for this relationship and owner)
 	var revokeList []string
 	for _, g := range grants2 {
-		if !misc.ContainsString(grants1, g) {
+		if !pgutil.ContainsString(grants1, g) {
 			revokeList = append(revokeList, g)
 		}
 	}
@@ -210,7 +209,7 @@ func (c *GrantAttributeSchema) Change(obj interface{}) {
 // ==================================
 
 // compareGrantAttributes outputs SQL to make the granted permissions match between DBs or schemas
-func compareGrantAttributes(conn1 *sql.DB, conn2 *sql.DB) {
+func CompareGrantAttributes(conn1 *sql.DB, conn2 *sql.DB) {
 
 	buf1 := new(bytes.Buffer)
 	grantAttributeSqlTemplate.Execute(buf1, pkg.DbInfo1)

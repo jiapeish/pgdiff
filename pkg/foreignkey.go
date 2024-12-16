@@ -13,7 +13,6 @@ import (
 	"sort"
 	"text/template"
 
-	"github.com/jiapeish/pgdiff/misc"
 	"github.com/jiapeish/pgdiff/pgutil"
 )
 
@@ -114,12 +113,12 @@ func (c *ForeignKeySchema) Compare(obj interface{}) int {
 	}
 
 	//fmt.Printf("Comparing %s with %s", c.get("table_name"), c2.get("table_name"))
-	val := misc.CompareStrings(c.get("compare_name"), c2.get("compare_name"))
+	val := pgutil.CompareStrings(c.get("compare_name"), c2.get("compare_name"))
 	if val != 0 {
 		return val
 	}
 
-	val = misc.CompareStrings(c.get("constraint_def"), c2.get("constraint_def"))
+	val = pgutil.CompareStrings(c.get("constraint_def"), c2.get("constraint_def"))
 	return val
 }
 
@@ -149,7 +148,7 @@ func (c *ForeignKeySchema) Change(obj interface{}) {
 /*
  * Compare the foreign keys in the two databases.
  */
-func compareForeignKeys(conn1 *sql.DB, conn2 *sql.DB) {
+func CompareForeignKeys(conn1 *sql.DB, conn2 *sql.DB) {
 
 	buf1 := new(bytes.Buffer)
 	foreignKeySqlTemplate.Execute(buf1, DbInfo1)

@@ -14,7 +14,6 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/jiapeish/pgdiff/misc"
 	"github.com/jiapeish/pgdiff/pgutil"
 )
 
@@ -101,7 +100,7 @@ func (c *TriggerSchema) Compare(obj interface{}) int {
 		return +999
 	}
 
-	val := misc.CompareStrings(c.get("compare_name"), c2.get("compare_name"))
+	val := pgutil.CompareStrings(c.get("compare_name"), c2.get("compare_name"))
 	return val
 }
 
@@ -159,7 +158,7 @@ func (c TriggerSchema) Change(obj interface{}) {
 }
 
 // compareTriggers outputs SQL to make the triggers match between DBs
-func compareTriggers(conn1 *sql.DB, conn2 *sql.DB) {
+func CompareTriggers(conn1 *sql.DB, conn2 *sql.DB) {
 
 	buf1 := new(bytes.Buffer)
 	triggerSqlTemplate.Execute(buf1, DbInfo1)

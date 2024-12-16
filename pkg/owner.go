@@ -13,7 +13,6 @@ import (
 	"sort"
 	"text/template"
 
-	"github.com/jiapeish/pgdiff/misc"
 	"github.com/jiapeish/pgdiff/pgutil"
 )
 
@@ -114,7 +113,7 @@ func (c *OwnerSchema) Compare(obj interface{}) int {
 		return +999
 	}
 
-	val := misc.CompareStrings(c.get("compare_name"), c2.get("compare_name"))
+	val := pgutil.CompareStrings(c.get("compare_name"), c2.get("compare_name"))
 	return val
 }
 
@@ -141,7 +140,7 @@ func (c OwnerSchema) Change(obj interface{}) {
 }
 
 // compareOwners compares the ownership of tables, sequences, and views between two databases or schemas
-func compareOwners(conn1 *sql.DB, conn2 *sql.DB) {
+func CompareOwners(conn1 *sql.DB, conn2 *sql.DB) {
 
 	buf1 := new(bytes.Buffer)
 	ownerSqlTemplate.Execute(buf1, DbInfo1)

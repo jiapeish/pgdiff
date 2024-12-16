@@ -14,7 +14,6 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/jiapeish/pgdiff/misc"
 	"github.com/jiapeish/pgdiff/pgutil"
 )
 
@@ -102,7 +101,7 @@ func (c *FunctionSchema) Compare(obj interface{}) int {
 		return +999
 	}
 
-	val := misc.CompareStrings(c.get("compare_name"), c2.get("compare_name"))
+	val := pgutil.CompareStrings(c.get("compare_name"), c2.get("compare_name"))
 	//fmt.Printf("-- Compared %v: %s with %s \n", val, c.get("function_name"), c2.get("function_name"))
 	return val
 }
@@ -165,7 +164,7 @@ func (c FunctionSchema) Change(obj interface{}) {
 // ==================================
 
 // compareFunctions outputs SQL to make the functions match between DBs
-func compareFunctions(conn1 *sql.DB, conn2 *sql.DB) {
+func CompareFunctions(conn1 *sql.DB, conn2 *sql.DB) {
 
 	buf1 := new(bytes.Buffer)
 	functionSqlTemplate.Execute(buf1, DbInfo1)

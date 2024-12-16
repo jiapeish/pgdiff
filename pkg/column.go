@@ -15,7 +15,6 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/jiapeish/pgdiff/misc"
 	"github.com/jiapeish/pgdiff/pgutil"
 )
 
@@ -145,14 +144,14 @@ func (c *ColumnSchema) Compare(obj interface{}) int {
 		fmt.Println("Error!!!, Compare needs a ColumnSchema instance", c2)
 	}
 
-	val := misc.CompareStrings(c.get("compare_name"), c2.get("compare_name"))
+	val := pgutil.CompareStrings(c.get("compare_name"), c2.get("compare_name"))
 	return val
 }
 
 // Add prints SQL to add the column
 func (c *ColumnSchema) Add() {
 
-	schema := main.dbInfo2.DbSchema
+	schema := DbInfo2.DbSchema
 	if schema == "*" {
 		schema = c.get("table_schema")
 	}
@@ -232,9 +231,9 @@ func (c *ColumnSchema) Change(obj interface{}) {
 				//    fmt.Println("-- WARNING: varchar column has no maximum length.  Setting to 1024, which may result in data loss.")
 				//}
 				max1Int, err1 := strconv.Atoi(max1)
-				main.check("converting string to int", err1)
+				pgutil.Check("converting string to int", err1)
 				max2Int, err2 := strconv.Atoi(max2)
-				main.check("converting string to int", err2)
+				pgutil.Check("converting string to int", err2)
 				if max1Int < max2Int {
 					fmt.Println("-- WARNING: The next statement will shorten a character varying column, which may result in data loss.")
 				}
@@ -309,10 +308,10 @@ func (c *ColumnSchema) Change(obj interface{}) {
 // compare outputs SQL to make the columns match between two databases or schemas
 func compare(conn1 *sql.DB, conn2 *sql.DB, tpl *template.Template) {
 	buf1 := new(bytes.Buffer)
-	tpl.Execute(buf1, main.dbInfo1)
+	tpl.Execute(buf1, DbInfo1)
 
 	buf2 := new(bytes.Buffer)
-	tpl.Execute(buf2, main.dbInfo2)
+	tpl.Execute(buf2, DbInfo2)
 
 	rowChan1, _ := pgutil.QueryStrings(conn1, buf1.String())
 	rowChan2, _ := pgutil.QueryStrings(conn2, buf2.String())
@@ -332,23 +331,23 @@ func compare(conn1 *sql.DB, conn2 *sql.DB, tpl *template.Template) {
 	sort.Sort(&rows2)
 
 	// We have to explicitly type this as Schema here for some unknown reason
-	var schema1 main.Schema = &ColumnSchema{rows: rows1, rowNum: -1}
-	var schema2 main.Schema = &ColumnSchema{rows: rows2, rowNum: -1}
+	var schema1 Schema = &ColumnSchema{rows: rows1, rowNum: -1}
+	var schema2 Schema = &ColumnSchema{rows: rows2, rowNum: -1}
 
 	// Compare the columns
-	main.doDiff(schema1, schema2)
+	DoDiff(schema1, schema2)
 
 }
 
 // compareColumns outputs SQL to make the columns match between two databases or schemas
-func compareColumns(conn1 *sql.DB, conn2 *sql.DB) {
+func CompareColumns(conn1 *sql.DB, conn2 *sql.DB) {
 
 	compare(conn1, conn2, columnSqlTemplate)
 
 }
 
 // compareColumns outputs SQL to make the tables columns (without views columns) match between two databases or schemas
-func compareTableColumns(conn1 *sql.DB, conn2 *sql.DB) {
+func CompareTableColumns(conn1 *sql.DB, conn2 *sql.DB) {
 
 	compare(conn1, conn2, tableColumnSqlTemplate)
 

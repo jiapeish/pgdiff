@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/jiapeish/pgdiff/misc"
 	"github.com/jiapeish/pgdiff/pgutil"
 )
 
@@ -69,7 +68,7 @@ func (c *MatViewSchema) Compare(obj interface{}) int {
 		return +999
 	}
 
-	val := misc.CompareStrings(c.get("matviewname"), c2.get("matviewname"))
+	val := pgutil.CompareStrings(c.get("matviewname"), c2.get("matviewname"))
 	//fmt.Printf("-- Compared %v: %s with %s \n", val, c.get("matviewname"), c2.get("matviewname"))
 	return val
 }
@@ -97,7 +96,7 @@ func (c MatViewSchema) Change(obj interface{}) {
 }
 
 // compareMatViews outputs SQL to make the matviews match between DBs
-func compareMatViews(conn1 *sql.DB, conn2 *sql.DB) {
+func CompareMatViews(conn1 *sql.DB, conn2 *sql.DB) {
 	sql := `
 	WITH matviews as ( SELECT schemaname || '.' || matviewname AS matviewname,
 	definition

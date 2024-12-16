@@ -1,9 +1,8 @@
-package misc
+package pgutil
 
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"strings"
@@ -34,7 +33,7 @@ func PromptYesNo(prompt string, yesIsDefault bool) bool {
 		// Read input
 		inReader := bufio.NewReader(os.Stdin)
 		text, err := inReader.ReadString('\n')
-		check(err, "reading stdin")
+		Check("reading stdin", err)
 
 		// Trim leading and trailing spaces, and convert to lower case
 		text = strings.TrimSpace(strings.ToLower(text))
@@ -84,7 +83,7 @@ func PromptPassword(prompt string) string {
 
 	// Get current state of terminal
 	s, err := terminal.MakeRaw(stdin)
-	check(err, "making raw terminal, Saving old terminal state")
+	Check("making raw terminal, Saving old terminal state", err)
 	defer terminal.Restore(stdin, s)
 
 	// trap Ctrl-C and restore screen
@@ -99,7 +98,7 @@ func PromptPassword(prompt string) string {
 
 	// Read password from stdin
 	b, err := terminal.ReadPassword(stdin)
-	check(err, "reading from terminal")
+	Check("reading from terminal", err)
 
 	return string(b)
 }
@@ -145,13 +144,4 @@ func CoalesceStrings(strs ...string) string {
 		}
 	}
 	return ""
-}
-
-// =================
-// Private functions
-// =================
-func check(err error, action string) {
-	if err != nil {
-		log.Fatalf("Error %s: %v\n", action, err)
-	}
 }

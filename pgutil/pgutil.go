@@ -11,7 +11,6 @@ import (
 
 	_ "github.com/lib/pq" // pg this import is for the PostgreSQL driver
 
-	"github.com/jiapeish/pgdiff/misc"
 	flag "github.com/jiapeish/pgdiff/pflag"
 	"github.com/jiapeish/pgdiff/pgutil/fileutil"
 )
@@ -40,8 +39,8 @@ type DbInfo struct {
 // are assumed so we don't continue processing DB flags if one of these is
 // set.
 func (dbInfo *DbInfo) Populate() (verFlag, helpFlag bool) {
-	hostDefault := misc.CoalesceStrings(os.Getenv("PGHOST"), "localhost")
-	portDefaultStr := misc.CoalesceStrings(os.Getenv("PGPORT"), "5432")
+	hostDefault := CoalesceStrings(os.Getenv("PGHOST"), "localhost")
+	portDefaultStr := CoalesceStrings(os.Getenv("PGPORT"), "5432")
 	dbDefault := os.Getenv("PGDATABASE")
 	userDefault := os.Getenv("PGUSER")
 	passDefault := os.Getenv("PGPASSWORD")
@@ -89,7 +88,7 @@ func (dbInfo *DbInfo) Populate() (verFlag, helpFlag bool) {
 				fmt.Fprintln(os.Stderr, "Password can not be prompted.")
 				os.Exit(1)
 			}
-			dbInfo.DbPass = misc.PromptPassword("Enter password: ")
+			dbInfo.DbPass = PromptPassword("Enter password: ")
 		} else {
 			// check ~/.pgpass file
 			dbInfo.DbPass = PgPassword(dbInfo.DbUser)
@@ -98,7 +97,7 @@ func (dbInfo *DbInfo) Populate() (verFlag, helpFlag bool) {
 					fmt.Fprintln(os.Stderr, "Password can not be prompted.")
 					os.Exit(1)
 				}
-				dbInfo.DbPass = misc.PromptPassword("Enter password: ")
+				dbInfo.DbPass = PromptPassword("Enter password: ")
 			}
 		}
 	}
@@ -177,9 +176,9 @@ func QueryStrings(db *sql.DB, query string) (chan map[string]string, []string) {
 	rowChan := make(chan map[string]string)
 
 	rows, err := db.Query(query)
-	check("running query", err)
+	Check("running query", err)
 	columnNames, err := rows.Columns()
-	check("getting column names", err)
+	Check("getting column names", err)
 
 	go func() {
 
@@ -194,7 +193,7 @@ func QueryStrings(db *sql.DB, query string) (chan map[string]string, []string) {
 
 		for rows.Next() {
 			err = rows.Scan(valPointers...)
-			check("scanning a row", err)
+			Check("scanning a row", err)
 
 			row := make(map[string]string)
 			// Convert each cell to a SQL-valid string representation
@@ -229,68 +228,7 @@ func QueryStrings(db *sql.DB, query string) (chan map[string]string, []string) {
 	return rowChan, columnNames
 }
 
-/*
- * Returns row maps (keyed by the column name) in a channel.
- * Dynamically converts each column value to a SQL string value.
- * See http://stackoverflow.com/questions/23507531/is-golangs-sql-package-incapable-of-ad-hoc-exploratory-queries
- */
-//func QuerySalValues(db *sql.DB, query string) (chan map[string]string, []string) {
-//	rowChan := make(chan map[string]string)
-//
-//	rows, err := db.Query(query)
-//	check("running query", err)
-//	columnNames, err := rows.Columns()
-//	check("getting column names", err)
-//
-//	go func() {
-//
-//		defer rows.Close()
-//
-//		vals := make([]interface{}, len(columnNames))
-//		valPointers := make([]interface{}, len(columnNames))
-//		// Copy
-//		for i := 0; i < len(columnNames); i++ {
-//			valPointers[i] = &vals[i]
-//		}
-//
-//		for rows.Next() {
-//			err = rows.Scan(valPointers...)
-//			check("scanning a row", err)
-//
-//			row := make(map[string]string)
-//			// Convert each cell to a SQL-valid string representation
-//			for i, valPtr := range vals {
-//				//fmt.Println(reflect.TypeOf(valPtr))
-//				switch valueType := valPtr.(type) {
-//				case nil:
-//					row[columnNames[i]] = "null"
-//				case []uint8:
-//					row[columnNames[i]] = "'" + string(valPtr.([]byte)) + "'"
-//				case string:
-//					row[columnNames[i]] = "'" + valPtr.(string) + "'"
-//				case int64:
-//					row[columnNames[i]] = fmt.Sprintf("%d", valPtr)
-//				case float64:
-//					row[columnNames[i]] = fmt.Sprintf("%f", valPtr)
-//				case bool:
-//					row[columnNames[i]] = fmt.Sprintf("%t", valPtr)
-//				case time.Time:
-//					row[columnNames[i]] = "'" + valPtr.(time.Time).Format(isoFormat) + "'"
-//				case fmt.Stringer:
-//					row[columnNames[i]] = fmt.Sprintf("%v", valPtr)
-//				default:
-//					row[columnNames[i]] = fmt.Sprintf("%v", valPtr)
-//					fmt.Println("Column %s is an unhandled type: %v", columnNames[i], valueType)
-//				}
-//			}
-//			rowChan <- row
-//		}
-//		close(rowChan)
-//	}()
-//	return rowChan, columnNames
-//}
-
-func check(msg string, err error) {
+func Check(msg string, err error) {
 	if err != nil {
 		log.Fatal("Error "+msg, err)
 	}

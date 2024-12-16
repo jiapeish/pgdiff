@@ -1,6 +1,8 @@
 package pkg
 
-import "github.com/jiapeish/pgdiff/pgutil"
+import (
+	"github.com/jiapeish/pgdiff/pgutil"
+)
 
 // Schema is a database definition (table, column, constraint, indes, role, etc) that can be
 // added, dropped, or changed to match another database.

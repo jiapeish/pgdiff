@@ -5,7 +5,7 @@
 // bcrypt is based on this paper:
 // https://www.usenix.org/legacy/event/usenix99/provos/provos.pdf
 //
-package misc
+package pgutil
 
 import (
 	"encoding/base64"

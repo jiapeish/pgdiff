@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/jiapeish/pgdiff/misc"
 	"github.com/jiapeish/pgdiff/pgutil"
 )
 
@@ -69,7 +68,7 @@ func (c *ViewSchema) Compare(obj interface{}) int {
 		return +999
 	}
 
-	val := misc.CompareStrings(c.get("viewname"), c2.get("viewname"))
+	val := pgutil.CompareStrings(c.get("viewname"), c2.get("viewname"))
 	//fmt.Printf("-- Compared %v: %s with %s \n", val, c.get("viewname"), c2.get("viewname"))
 	return val
 }
@@ -97,7 +96,7 @@ func (c ViewSchema) Change(obj interface{}) {
 }
 
 // compareViews outputs SQL to make the views match between DBs
-func compareViews(conn1 *sql.DB, conn2 *sql.DB) {
+func CompareViews(conn1 *sql.DB, conn2 *sql.DB) {
 	sql := `
 	SELECT schemaname || '.' || viewname AS viewname
 		, definition 

@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/jiapeish/pgdiff/misc"
 	"github.com/jiapeish/pgdiff/pgutil"
 )
 
@@ -69,7 +68,7 @@ func (c *SchemataSchema) Compare(obj interface{}) int {
 		return +999
 	}
 
-	val := misc.CompareStrings(c.get("schema_name"), c2.get("schema_name"))
+	val := pgutil.CompareStrings(c.get("schema_name"), c2.get("schema_name"))
 	//fmt.Printf("-- Compared %v: %s with %s \n", val, c.get("schema_name"), c2.get("schema_name"))
 	return val
 }
@@ -97,7 +96,7 @@ func (c SchemataSchema) Change(obj interface{}) {
 }
 
 // compareSchematas outputs SQL to make the schema names match between DBs
-func compareSchematas(conn1 *sql.DB, conn2 *sql.DB) {
+func CompareSchematas(conn1 *sql.DB, conn2 *sql.DB) {
 
 	// if we are comparing two schemas against each other, then
 	// we won't compare to ensure they are created, although maybe we should.

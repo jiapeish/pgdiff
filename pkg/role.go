@@ -13,7 +13,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/jiapeish/pgdiff/misc"
 	"github.com/jiapeish/pgdiff/pgutil"
 )
 
@@ -80,7 +79,7 @@ func (c *RoleSchema) Compare(obj interface{}) int {
 		return +999
 	}
 
-	val := misc.CompareStrings(c.get("rolname"), c2.get("rolname"))
+	val := pgutil.CompareStrings(c.get("rolname"), c2.get("rolname"))
 	return val
 }
 
@@ -252,13 +251,13 @@ func (c RoleSchema) Change(obj interface{}) {
 
 		// TODO: Define INHERIT or not
 		for _, mo1 := range membersof1 {
-			if !misc.ContainsString(membersof2, mo1) {
+			if !pgutil.ContainsString(membersof2, mo1) {
 				fmt.Printf("GRANT %s TO %s;\n", mo1, c.get("rolname"))
 			}
 		}
 
 		for _, mo2 := range membersof2 {
-			if !misc.ContainsString(membersof1, mo2) {
+			if !pgutil.ContainsString(membersof1, mo2) {
 				fmt.Printf("REVOKE %s FROM %s;\n", mo2, c.get("rolname"))
 			}
 		}
@@ -269,7 +268,7 @@ func (c RoleSchema) Change(obj interface{}) {
 /*
  * Compare the roles between two databases or schemas
  */
-func compareRoles(conn1 *sql.DB, conn2 *sql.DB) {
+func CompareRoles(conn1 *sql.DB, conn2 *sql.DB) {
 	sql := `
 SELECT r.rolname
     , r.rolsuper

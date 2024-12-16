@@ -13,7 +13,6 @@ import (
 	"sort"
 	"text/template"
 
-	"github.com/jiapeish/pgdiff/misc"
 	"github.com/jiapeish/pgdiff/pgutil"
 )
 
@@ -102,7 +101,7 @@ func (c *SequenceSchema) Compare(obj interface{}) int {
 		return +999
 	}
 
-	val := misc.CompareStrings(c.get("compare_name"), c2.get("compare_name"))
+	val := pgutil.CompareStrings(c.get("compare_name"), c2.get("compare_name"))
 	return val
 }
 
@@ -130,7 +129,7 @@ func (c SequenceSchema) Change(obj interface{}) {
 }
 
 // compareSequences outputs SQL to make the sequences match between DBs or schemas
-func compareSequences(conn1 *sql.DB, conn2 *sql.DB) {
+func CompareSequences(conn1 *sql.DB, conn2 *sql.DB) {
 
 	buf1 := new(bytes.Buffer)
 	sequenceSqlTemplate.Execute(buf1, DbInfo1)

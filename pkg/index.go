@@ -14,7 +14,6 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/jiapeish/pgdiff/misc"
 	"github.com/jiapeish/pgdiff/pgutil"
 )
 
@@ -125,7 +124,7 @@ func (c *IndexSchema) Compare(obj interface{}) int {
 		fmt.Printf("--           %v\n", c2.getRow())
 	}
 
-	val := misc.CompareStrings(c.get("compare_name"), c2.get("compare_name"))
+	val := pgutil.CompareStrings(c.get("compare_name"), c2.get("compare_name"))
 	return val
 }
 
@@ -266,7 +265,7 @@ func (c *IndexSchema) Change(obj interface{}) {
 }
 
 // compareIndexes outputs Sql to make the indexes match between to DBs or schemas
-func compareIndexes(conn1 *sql.DB, conn2 *sql.DB) {
+func CompareIndexes(conn1 *sql.DB, conn2 *sql.DB) {
 
 	buf1 := new(bytes.Buffer)
 	indexSqlTemplate.Execute(buf1, DbInfo1)

@@ -6,6 +6,17 @@ pgdiff is transparent in what it does, so it never modifies a database directly.
 
 pgdiff is written to be easy to expand and improve the accuracy of the diff.
 
+### quickstart
+
+build the binary file
+```shell
+    GOOS=darwin GOARCH=arm64 go build -o pgdiff
+```
+
+execute the pgdiff shell
+```shell
+    USER1=jira HOST1=172.29.16.136 NAME1=jiradb USER2=jira HOST2=172.29.16.180 NAME2=jiradb ./pgdiff.sh
+```
 
 ### download 1.0 beta 1
 [osx](https://github.com/joncrlsn/pgdiff/releases/download/v1.0-beta.1/pgdiff-osx-1.0b1.tar.gz "OSX version") &nbsp; [linux](https://github.com/joncrlsn/pgdiff/files/1480823/pgdiff-linux-1.0b1.tar.gz  "Linux version") &nbsp; [windows](https://github.com/joncrlsn/pgdiff/releases/download/v1.0-beta.1/pgdiff-win-1.0b1.zip "Windows version")
